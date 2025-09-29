@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Shargathx/TA_Projekt_1_Veeb#readme",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "ejs": "^3.1.10"
   }
 }
