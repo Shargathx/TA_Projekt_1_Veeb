@@ -1,0 +1,22 @@
+{
+  "name": "ta_projekt_1_veeb",
+  "version": "1.0.0",
+  "description": "Testifail",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://Shargathx@github.com/Shargathx/TA_Projekt_1_Veeb.git"
+  },
+  "author": "martin Saareväli",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Shargathx/TA_Projekt_1_Veeb/issues"
+  },
+  "homepage": "https://github.com/Shargathx/TA_Projekt_1_Veeb#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
