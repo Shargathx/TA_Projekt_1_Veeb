@@ -16,7 +16,6 @@
   <p>Hobikorras tegelen klaveriõppega, samuti olen tegelenud laskespordiga ja motokrossiga.</p>
   <hr>
   <!-- <hr> teeb horizontal rule, peenike jutt / riba -->
-
   <ul>
     <li><a href="/"> Avaleht </a></li>
   </ul>
@@ -25,11 +24,13 @@
     <%= heading %>
   </h2>
   <ul>
-    <!-- %-märkidega on ejs kood muutujate märkimiseks -->
-    <% listData.forEach(function(listItem){ %>
-      <ol> <%= listItem %> </ol>
+    <ol>
+      <% listData.forEach(function(listItem){ %>
+        <li><%= listItem %>
 
-      <% }); %>
+          <% }); %></li>
+    </ol>
+    <!-- %-märkidega on ejs kood muutujate märkimiseks -->
   </ul>
 
 </body>
