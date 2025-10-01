@@ -46,9 +46,11 @@ app.get("/timenow", (req, res) => {
 // });
 
 app.get("/vanasonad", (req, res) => {
+    const randomWisdom = WisdomList.getSingleWisdomSaying();
     const list = WisdomList.generateAllVanasonad();
     res.render("genericlist", {
         heading: "Vanasõnade list",
+        singleWisdom: randomWisdom,
         listData: list.length ? list : ["Ei leidnud ühte vanasõna!"]
     });
 });

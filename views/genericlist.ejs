@@ -24,6 +24,11 @@
     <%= heading %>
   </h2>
 
+  <h3>Juhuslik vanasõna:</h3>
+  <p class="no-style">
+    <%= singleWisdom %>
+  </p>
+  <h3>Kõik vanasõnad:</h3>
   <ol>
     <% listData.forEach(function(listItem){ %>
       <li>
@@ -43,6 +48,14 @@
     text-align: center;
     margin: 20px;
     font-family: Arial, sans-serif;
+  }
+
+  .no-style {
+    all: unset;
+    display: block;
+    margin: 0;
+    font-family: initial;
+    text-align: left;
   }
 </style>
 
