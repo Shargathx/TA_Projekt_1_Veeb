@@ -23,18 +23,17 @@
   <h2>
     <%= heading %>
   </h2>
-  <ul>
-    <ol>
-      <% listData.forEach(function(listItem){ %>
-        <li><%= listItem %>
 
-          <% }); %></li>
-    </ol>
-    <!-- %-märkidega on ejs kood muutujate märkimiseks -->
-  </ul>
+  <ol>
+    <% listData.forEach(function(listItem){ %>
+      <li>
+        <%= listItem %>
+      </li>
+      <% }); %>
+  </ol>
 
 </body>
-
+<!-- %-märkidega on ejs kood muutujate märkimiseks -->
 
 
 <style>

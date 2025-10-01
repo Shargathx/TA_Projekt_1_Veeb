@@ -1,12 +1,15 @@
 const fs = require("fs");
 const path = require("path");
-const textRef = path.join(__dirname, "../txt/vanasonad.txt");
+const textRef = path.join(__dirname, "../public/txt/vanasonad.txt");
+
+console.log("Text file path:", textRef);
+console.log("Fail olemas?", fs.existsSync(textRef));
 
 const generateAllVanasonad = function() {
     try {
         let data = fs.readFileSync(textRef, "utf8");
         if (data) {
-            let list = data.split(";");
+            let list = data.split(";").map(s => s.trim()).filter(Boolean);
             return list;
         } else {
             return [];

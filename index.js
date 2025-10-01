@@ -1,4 +1,5 @@
 const fs = require("fs");
+const WisdomList = require("./src/wisdomList");
 // päringu "lahtiharitaja" POST jaoks
 const bodyparser = require("body-parser");
 const path = require("path");
@@ -29,18 +30,29 @@ app.get("/timenow", (req, res) => {
     res.render("timenow", { weekDayNow: weekDayNow, dateNow: dateNow });
 });
 
+
+// THE COMMENTED PART IS ONE WAY OF DOING IT, BUT SINCE I HAVE THE WISDOMLIST.JS, I CAN JUST CALL UPON THAT
+// app.get("/vanasonad", (req, res) => {
+//     fs.readFile(textRef, "utf8", (err, data) => {
+//         if (err) {
+//             // kui error, siis ikka väljastab veebilehe, lihtsalt vanasõnu pole ühtegi
+//             res.render("genericlist", { heading: "Vanasonade list", listData: ["Ei leidnud ühtegi vanasõna!"] });
+//         }
+//         else {
+//             folkWisdom = data.split(";");
+//             res.render("genericlist", { heading: "Vanasonade list", listData: folkWisdom });
+//         }
+//     });
+// });
+
 app.get("/vanasonad", (req, res) => {
-    fs.readFile(textRef, "utf8", (err, data) => {
-        if (err) {
-            // kui error, siis ikka väljastab veebilehe, lihtsalt vanasõnu pole ühtegi
-            res.render("genericlist", { heading: "Vanasonade list", listData: ["Ei leidnud ühtegi vanasõna!"] });
-        }
-        else {
-            folkWisdom = data.split(";");
-            res.render("genericlist", { heading: "Vanasonade list", listData: folkWisdom });
-        }
+    const list = WisdomList.generateAllVanasonad();
+    res.render("genericlist", {
+        heading: "Vanasõnade list",
+        listData: list.length ? list : ["Ei leidnud ühte vanasõna!"]
     });
 });
+
 
 app.get("/regvisit", (req, res) => {
     res.render("regvisit");
@@ -68,6 +80,6 @@ app.post("/regvisit", (req, res) => {
     });
 });
 
-app.listen(5135, () => {
+app.listen(5135, "0.0.0.0", () => {
     console.log("Server running at http://localhost:5135/");
 });
