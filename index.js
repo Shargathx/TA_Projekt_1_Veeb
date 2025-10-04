@@ -4,6 +4,7 @@ const WisdomList = require("./src/wisdomList");
 const bodyparser = require("body-parser");
 const path = require("path");
 const textRef = path.join(__dirname, "../txt/vanasonad.txt");
+const visitorPath = "public/txt/visitlog.txt";
 const express = require("express");
 const dateEt = require("./src/dateTimeET");
 const { brotliDecompress } = require("zlib");
@@ -61,27 +62,44 @@ app.get("/regvisit", (req, res) => {
 });
 
 app.post("/regvisit", (req, res) => {
+    const firstName = req.body.firstNameInput;
+    const lastName = req.body.lastNameInput;
+    const dateNow = dateEt.fullDate();
+    const timeNow = dateEt.fullTime();
+    const getVisitDetails = `${firstName} ${lastName}, ${dateNow}, ${timeNow}\n`;
     console.log(req.body);
     // avan tekstifaili kirjutamiseks sellisel moel, et kui teda pole, luuakse (parameeter "a" <- teeb nii, et kui faili pole, siis loob selle faili meile automaatselt)
-    fs.open("public/txt/visitlog.txt", "a", (err, file) => {
+
+    fs.open(visitorPath, "a", (err, file) => {
         if (err) {
-            throw (err);
-        }
-        else {
+            throw err;
+        } else {
             // faili senisele sisule lisamine
-            fs.appendFile("public/txt/visitlog.txt", req.body.nameInput + "; ", (err) => {
+            fs.appendFile(visitorPath, getVisitDetails, (err) => {
                 if (err) {
-                    throw (err);
-                }
-                else {
+                    throw err;
+                } else {
                     console.log("Salvestatud!");
-                    res.render("regvisit");
+                    // näitame kasutajale kinnituse lehte
+                    res.render("confirmregister", { firstName, lastName });
                 }
             });
         }
     });
 });
 
-app.listen(5135, "0.0.0.0", () => {
+app.get("/visitors", (req, res) => {
+    fs.readFile(visitorPath, "utf8", (err, data) => {
+        if (err) {
+            console.error(err);
+            return res.render("visitors", { visitors: ["Ei leitud ühtegi külastust!"] });
+        }
+        // spitib iga külastuse uuele reale (eemaldab ka tühjad kohad / tühikud)
+        const visitors = data.split("\n").filter(line => line.trim() !== "");
+        res.render("visitors", { visitors });
+    });
+});
+
+app.listen(5135,  () => {
     console.log("Server running at http://localhost:5135/");
 });
