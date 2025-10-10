@@ -60,6 +60,8 @@ app.get("/Eestifilm/filmiinimesed_add", (req, res) => {
 });
 
 
+
+
 /* GPT SOLUTION FOR MISSING DATE FOR DECEASED INPUT THROWING ERROR
 const deceasedValue = req.body.deceasedInput ? req.body.deceasedInput : null;
 
@@ -79,13 +81,17 @@ conn.execute(
 */
 app.post("/Eestifilm/filmiinimesed_add", (req, res) => {
     console.log(req.body);
+    let deceasedDate = null;
+    if (req.body.deceasedInput != "") {
+        deceasedDate = req.body.deceasedInput;
+    }
     // res.render("filmiinimesed_add");
     if (!req.body.firstNameInput || !req.body.lastNameInput || !req.body.bornInput || !req.body.bornInput >= new Date()) {
         res.render("filmiinimesed_add", { notice: "Andmed vigased või puudu" });
     }
     else {
         let sqlReq = "INSERT INTO person (first_name, last_name, born, deceased) VALUES (?, ?, ?, ?)"; // küsimärgid märgivad saadetavaid andmeid, nii palju kui vajalikke andmeid, nii palju küsimärke
-        conn.execute(sqlReq, [req.body.firstNameInput, req.body.lastNameInput, req.body.bornInput, req.body.deceasedInput], (err, sqlres) => {
+        conn.execute(sqlReq, [req.body.firstNameInput, req.body.lastNameInput, req.body.bornInput, req.body.deceasedDate], (err, sqlres) => {
             if (err) {
                 console.error("SQL insert error:", err);
                 res.render("filmiinimesed_add", { notice: "Salvestamine ebaõnnestus!" });
@@ -93,6 +99,43 @@ app.post("/Eestifilm/filmiinimesed_add", (req, res) => {
             }
             else {
                 res.render("filmiinimesed_add", { notice: "Salvestamine õnnestus, grats" });
+            }
+        });
+    }
+});
+
+app.get("/Eestifilm/filmi_position_add", (req, res) => {
+    console.log(req.body);
+    res.render("filmi_position_add", { notice: "Ootan sisestust!" });
+});
+
+app.get("/Eestifilm/film_positions", (req, res) => {
+    const sqlReq = "SELECT * FROM `position`"; // teeb SQL päringu minu andmebaasile, tavalised SQL commandid
+    conn.execute(sqlReq, (err, sqlres) => {
+        if (err) {
+            throw (err);
+        }
+        else {
+            console.log(sqlres);
+            res.render("film_positions", { positionList: sqlres }); // lihtsalt kontrolliks, kas midagi läheb katki or nah
+        }
+    });
+});
+
+app.post("/Eestifilm/filmi_position_add", (req, res) => {
+    console.log(req.body);
+    if (!req.body.positionInput || !req.body.positionDescriptionInput) {
+        res.render("filmi_position_add", { notice: "Andmed vigased või puudu" });
+    }
+    else {
+        let sqlReq = "INSERT INTO `position` (position_name, description) VALUES (?, ?)"; // küsimärgid märgivad saadetavaid andmeid, nii palju kui vajalikke andmeid, nii palju küsimärke
+        conn.execute(sqlReq, [req.body.positionInput, req.body.positionDescriptionInput], (err, sqlres) => {
+            if (err) {
+                console.error("SQL insert error:", err);
+                res.render("filmi_position_add", { notice: "Salvestamine ebaõnnestus!" });
+            }
+            else {
+                res.redirect("/Eestifilm/film_positions");
             }
         });
     }

@@ -22,21 +22,24 @@
     <li><a href="/Eestifilm">Eesti filmide avaleht</a></li>
   </ul>
   <hr>
-  <h2> Eesti filmiinimesed </h2>
-<ol>
-  <% personList.forEach(function(listItem){ %>
-    <li>
-      <%= listItem.first_name %> <%= listItem.last_name %>, sündinud 
-      <%= new Date(listItem.born).toLocaleDateString("et-EE", { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
-      <% if (listItem.deceased) { %> , surnud 
-      <%= new Date(listItem.deceased).toLocaleDateString("et-EE", { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
-      <% } %>
-    </li>
-  <% }); %>
-</ol>
+  <h2> Uue rolli või positsiooni lisamine </h2>
+
+  <form method="POST">
+    <label for="positionInput"> Rolli / positsiooni nimetus </label>
+    <input id="positionInput" name="positionInput" type="text" placeholder="Rolli / positsiooni nimi" required>
+    <br>
+    <label for="positionDescriptionInput"> Rolli või positsiooni kirjeldus </label>
+    <textarea id="positionDescriptionInput" name="positionDescriptionInput" cols="100" rows="5" placeholder="Ameti lühikirjeldus..." required> </textarea>  
+    <br>
+    <input id="positionSubmit" name="positionSubmit" type="submit" value="Salvesta positsioon andmebaasi">
+  </form>
+  <p>
+    Staatus: <%= notice %>
+  </p>
+
 
 </body>
-
+<!-- action="/Eestifilm/filmi_position_add -->
 
 
 <style>

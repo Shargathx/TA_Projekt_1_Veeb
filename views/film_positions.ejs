@@ -20,20 +20,19 @@
   <ul>
     <li><a href="/"> Avaleht </a></li>
     <li><a href="/Eestifilm">Eesti filmide avaleht</a></li>
+    <li><a href="/Eestifilm/filmi_position_add">Lisa uus filmi positsioon</a></li>
   </ul>
   <hr>
-  <h2> Eesti filmiinimesed </h2>
-<ol>
-  <% personList.forEach(function(listItem){ %>
-    <li>
-      <%= listItem.first_name %> <%= listItem.last_name %>, sündinud 
-      <%= new Date(listItem.born).toLocaleDateString("et-EE", { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
-      <% if (listItem.deceased) { %> , surnud 
-      <%= new Date(listItem.deceased).toLocaleDateString("et-EE", { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
-      <% } %>
-    </li>
-  <% }); %>
-</ol>
+  <h2> Eesti filmide erinevad positsioonid </h2>
+  <ol>
+    <!-- %-märkidega on ejs kood muutujate märkimiseks -->
+
+    <% positionList.forEach(function(listItem){ %>
+      <li>
+        <%= listItem.position_name %> --- <%= listItem.description %>
+      </li>
+      <% }); %>
+  </ol>
 
 </body>
 
