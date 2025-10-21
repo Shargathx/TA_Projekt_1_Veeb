@@ -19,18 +19,22 @@
 
   <ul>
     <li><a href="/"> Avaleht </a></li>
+    <li><a href="/Eestifilm">Eesti filmide avaleht</a></li>
   </ul>
   <hr>
-  <h2> Eesti film </h2>
-  <ul>
-    <!-- %-märkidega on ejs kood muutujate märkimiseks -->
-    <li><a href="/Eestifilm/inimesed">Eesti filmiinimesed</a></li>
-    <li><a href="/Eestifilm/filmiinimesed_add">Eesti filmiinimeste lisamine</a></li>
-    <li><a href="/Eestifilm/position">Eesti filmi positsioonid</a></li>
-    <li><a href="/Eestifilm/position_add">Uue filmi positsiooni lisamine</a></li>
-    <li><a href="/Eestifilm/movies">Olemasolevad filmid</a></li>
-    <li><a href="/Eestifilm/movies_add">Uue filmi lisamine </a></li>
-  </ul>
+  <h2> Eesti filmid </h2>
+  <ol>
+    <% movieList.forEach(function(listItem){ %>
+      <li>
+        Filmi nimi: <%= listItem.title %> <br>
+          Toodetud aastal: <%= listItem.production_year %> <br>
+            Pikkus: <%= listItem.duration %> minutit
+              <% if (listItem.description) { %> <br>
+                Lühikirjeldus: <%= listItem.description %>
+                  <% } %>
+      </li>
+      <% }); %>
+  </ol>
 
 </body>
 

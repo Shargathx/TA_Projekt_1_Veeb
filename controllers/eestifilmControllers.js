@@ -163,6 +163,71 @@ const filmPositionAddPost = async (req, res) => { // võtab info ja saada POSTi
     // });
 }
 
+const movies = async (req, res) => {
+    // title, production_year, duration (minutes), description
+    let conn;
+    const sqlReq = "SELECT * FROM movie"; // teeb SQL päringu minu andmebaasile, tavalised SQL commandid
+    try {
+        conn = await mysql.createConnection(dbConfig);
+        console.log(sqlReq);
+        const [rows, fields] = await conn.execute(sqlReq); // saadab selle ülevalpool nimetatud asja (sqlReq const) välja, salvestab selle massiivi! rows ja fields, kuna tegemist on SELECT käsuga
+        res.render("movies", { movieList: rows });
+    }
+    catch (err) {
+        console.error("SQL query error:", err);
+        res.render("movies", { movieList: [] });
+
+    }
+    finally {
+        if (conn) { // kui ühendus ON olemas:
+            await conn.end(); // closes the DB connection
+            console.log("Connection ended!");
+        }
+    }
+};
+
+const moviesGet = (req, res) => { // näitab tühja form-i
+    console.log(req.body);
+    res.render("movies_add", { notice: "Ootan sisestust!" });
+}
+
+
+// TODO: movie aasta ei saa olla suurem, kui tänane päev (tulevikku filme ei saa lisada)
+const movieAddPost = async (req, res) => { // võtab info ja saada POSTi
+    console.log(req.body);
+    let movieDescription = null;
+    let conn; // connection
+    let sqlReq = "INSERT INTO movie (title, production_year, duration, description) VALUES (?, ?, ?, ?)"; // küsimärgid märgivad saadetavaid andmeid, nii palju kui vajalikke andmeid, nii palju küsimärke
+    try {
+        conn = await mysql.createConnection(dbConfig);
+        console.log("DB ühendus loodud!");
+        if (req.body.movieDescription != "") {
+            movieDescription = req.body.movieDescriptionInput;
+        }
+        const [result] = await conn.execute(sqlReq, [req.body.movieNameInput, req.body.movieProductionYearInput, req.body.movieLengthInput, req.body.movieDescriptionInput]); // kuna tuleb palju andmeid tagasi, siis on result massiiv
+        console.log("Salvestati kirje: " + result.insertId); // saame teada selle äsja lisatud kirje ID
+        await res.redirect("/Eestifilm/movies");
+    }
+    catch (err) {
+        throw (err);
+    }
+    finally {
+        if (conn) { // kui ühendus ON olemas:
+            await conn.end(); // closes the DB connection
+            console.log("Connection ended!");
+        }
+    }
+    // conn.execute(sqlReq, [req.body.positionInput, req.body.positionDescriptionInput], (err, sqlres) => {
+    //     if (err) {
+    //         console.error("SQL insert error:", err);
+    //         res.render("filmi_position_add", { notice: "Salvestamine ebaõnnestus!" });
+    //     }
+    //     else {
+    //         res.redirect("/Eestifilm/film_positions");
+    //     }
+    // });
+}
+
 
 module.exports = {
     eestifilm,
@@ -171,6 +236,9 @@ module.exports = {
     inimesedAddPost,
     position,
     filmPositionAdd,
-    filmPositionAddPost
+    filmPositionAddPost,
+    movies,
+    moviesGet,
+    movieAddPost
 
 }

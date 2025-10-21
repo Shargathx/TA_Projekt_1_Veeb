@@ -9,7 +9,10 @@ const {
     inimesedAddPost,
     position,
     filmPositionAdd,
-    filmPositionAddPost
+    filmPositionAddPost,
+    movies,
+    moviesGet,
+    movieAddPost,
 } = require("../controllers/eestifilmControllers");
 
 router.route("/").get(eestifilm); // tema enda juur on tegelt Eestifilm, aga tema tõlgendab automaatselt kui "/"
@@ -17,8 +20,11 @@ router.route("/inimesed").get(inimesed); // kaob Eestifilm eest ära
 router.route("/filmiinimesed_add").get(inimesedAdd);
 router.route("/filmiinimesed_add").post(inimesedAddPost);
 router.route("/position").get(position);
-router.route("/position_add").get(filmPositionAdd); // comment back in later, when they work
-router.route("/position_add").post(filmPositionAddPost); // comment back in later, when they work
+router.route("/position_add").get(filmPositionAdd);
+router.route("/position_add").post(filmPositionAddPost);
+router.route("/movies").get(movies);
+router.route("/movies_add").get(moviesGet); // toob ette TÜHJA POST-formi
+router.route("/movies_add").post(movieAddPost); // saadab täidetud POST-formi teele
 
 module.exports = router; // ekspordib kõik siin olevad route-id
 

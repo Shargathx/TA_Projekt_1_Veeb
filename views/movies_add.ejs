@@ -19,21 +19,33 @@
 
   <ul>
     <li><a href="/"> Avaleht </a></li>
+    <li><a href="/Eestifilm">Eesti filmide avaleht</a></li>
   </ul>
   <hr>
-  <h2> Eesti film </h2>
-  <ul>
-    <!-- %-märkidega on ejs kood muutujate märkimiseks -->
-    <li><a href="/Eestifilm/inimesed">Eesti filmiinimesed</a></li>
-    <li><a href="/Eestifilm/filmiinimesed_add">Eesti filmiinimeste lisamine</a></li>
-    <li><a href="/Eestifilm/position">Eesti filmi positsioonid</a></li>
-    <li><a href="/Eestifilm/position_add">Uue filmi positsiooni lisamine</a></li>
-    <li><a href="/Eestifilm/movies">Olemasolevad filmid</a></li>
-    <li><a href="/Eestifilm/movies_add">Uue filmi lisamine </a></li>
-  </ul>
+  <h2> Uue filmi lisamine </h2>
+
+  <form method="POST">
+    <label for="movieNameInput"> Filmi nimi </label>
+    <input id="movieNameInput" name="movieNameInput" type="text" placeholder="Filmi nimi" required>
+    <br>
+    <label for="movieProductionYearInput">Filmi valmimise aasta</label>
+    <input id="movieProductionYearInput" name="movieProductionYearInput" type="text" placeholder="Filmi valmimise aasta" required>
+    <br>
+    <label for="movieLengthInput">Filmi pikkus (minutites)</label>
+    <input id="movieLengthInput" name="movieLengthInput" type="text" placeholder="Filmi pikkus (minutites)" required>
+    <br>
+    <label for="movieDescriptionInput"> Filmi lühikirjeldus </label>
+    <textarea id="movieDescriptionInput" name="movieDescriptionInput" cols="100" rows="5" placeholder="Filmi lühikirjeldus" required> </textarea>  
+    <br>
+    <input id="positionSubmit" name="positionSubmit" type="submit" value="Salvesta film andmebaasi">
+  </form>
+  <p>
+    Staatus: <%= notice %>
+  </p>
+
 
 </body>
-
+<!-- action="/Eestifilm/filmi_position_add -->
 
 
 <style>
