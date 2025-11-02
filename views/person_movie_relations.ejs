@@ -19,27 +19,27 @@
 
   <ul>
     <li><a href="/"> Avaleht </a></li>
+    <li><a href="/Eestifilm">Eesti filmide avaleht</a></li>
   </ul>
   <hr>
-  <h2> Pane end külastajana kirja </h2>
-  <form method="post">
-    <label for="firstNameInput">Eesnimi</label><br>
-    <input id="firstNameInput" type="text" name="firstNameInput" placeholder="Kirjuta oma eesnimi">
-    <br><br>
-
-    <label for="lastNameInput">Perekonnanimi</label><br>
-    <input id="lastNameInput" type="text" name="lastNameInput" placeholder="Kirjuta oma perekonnanimi">
-    <br><br>
-
-    <input id="regSubmit" type="submit" name="regSubmit" value="Salvesta">
-  </form>
+  <h2> Kõik filmi-rolli-inimeste seosed </h2>
+  <ol>
+    <% relationList.forEach(function(rel){ %>
+      <li>
+        Person ID: <%= rel.person_id %> <br>
+          Movie ID: <%= rel.movie_id %> <br>
+            Position ID: <%= rel.position_id %> <br>
+              Role: <%= rel.role || "-" %>
+      </li>
+      <% }) %>
+  </ol>
 
 </body>
 
 
 
 <style>
-  h1, 
+  h1,
   p,
   img {
     text-align: center;
@@ -48,11 +48,4 @@
   }
 </style>
 
-
 </html>
-
-<!-- moodle kursuse võti: VP2025TA -->
-<!-- parooli muutmiseks command: passwd -->
-<!-- väljumiseks: exit -->
-<!-- failide transpordiks: WinSCP -->
-<!-- tunneli server: lin2.tlu.ee -->

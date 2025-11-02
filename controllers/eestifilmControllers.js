@@ -228,6 +228,85 @@ const movieAddPost = async (req, res) => { // võtab info ja saada POSTi
     // });
 }
 
+const relationMoviePersonPosition = async (req, res) => {
+    let conn;
+    try {
+        conn = await mysql.createConnection(dbConfig);
+        const [movies] = await conn.execute("SELECT * FROM movie");
+        const [persons] = await conn.execute("SELECT * FROM person");
+        const [positions] = await conn.execute("SELECT * FROM position");
+
+        res.render("person_movie_position", { movieList: movies, personList: persons, positionList: positions, notice: "" });
+
+    }
+    catch (err) {
+        console.error("SQL query error:", err);
+        res.render("person_movie_position", { movieList: [], personList: [], positionList: [] });
+    }
+    finally {
+        if (conn) { // kui ühendus ON olemas:
+            await conn.end(); // closes the DB connection
+            console.log("Connection ended!");
+        }
+    }
+};
+
+const relationMoviePersonPositionPost = async (req, res) => {
+    let conn;
+    try {
+        conn = await mysql.createConnection(dbConfig);
+        const { personSelect, movieSelect, positionSelect, rolenameInput } = req.body;
+        console.log("personSelect:", personSelect);
+        console.log("movieSelect:", movieSelect);
+        console.log("positionSelect:", positionSelect);
+        console.log("rolenameInput:", rolenameInput);
+
+
+        let roleName = null;
+        if (Number(positionSelect) === 1) { // id 1 == näitleja
+            roleName = rolenameInput || null;
+        }
+
+        await conn.execute("INSERT INTO person_in_movie (person_id, movie_id, position_id, role) VALUES (?, ?, ?, ?)", [personSelect, movieSelect, positionSelect, roleName]);
+        /*
+        const [movies] = await conn.execute("SELECT * FROM movie");
+        const [persons] = await conn.execute("SELECT * FROM person");
+        const [positions] = await conn.execute("SELECT * FROM position");
+        res.render("person_movie_position", { movieList: movies, personList: persons, positionList: positions, notice: "Seos lisatud!" });
+        */
+        // redirect to all relations:
+        res.redirect("person_movie_relations");
+
+    }
+    catch (err) {
+        console.error("SQL query error:", err);
+        res.render("person_movie_position", { movieList: [], personList: [], positionList: [], notice: "Viga!" });
+    }
+    finally {
+        if (conn) { // kui ühendus ON olemas:
+            await conn.end(); // closes the DB connection
+            console.log("Connection ended!");
+        }
+    }
+};
+
+const personMovieRelations = async (req, res) => {
+    let conn;
+    try {
+        conn = await mysql.createConnection(dbConfig);
+
+        const [relations] = await conn.execute("SELECT * FROM person_in_movie");
+        res.render("person_movie_relations", { relationList: relations });
+
+    } catch (err) {
+        console.error("SQL query error:", err);
+        res.render("person_movie_relations", { relationList: [] });
+    } finally {
+        if (conn) await conn.end();
+    }
+};
+
+
 
 module.exports = {
     eestifilm,
@@ -239,6 +318,9 @@ module.exports = {
     filmPositionAddPost,
     movies,
     moviesGet,
-    movieAddPost
+    movieAddPost,
+    relationMoviePersonPosition,
+    relationMoviePersonPositionPost,
+    personMovieRelations
 
 }

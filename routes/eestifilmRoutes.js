@@ -13,6 +13,9 @@ const {
     movies,
     moviesGet,
     movieAddPost,
+    relationMoviePersonPosition,
+    relationMoviePersonPositionPost,
+    personMovieRelations,
 } = require("../controllers/eestifilmControllers");
 
 router.route("/").get(eestifilm); // tema enda juur on tegelt Eestifilm, aga tema tõlgendab automaatselt kui "/"
@@ -25,6 +28,9 @@ router.route("/position_add").post(filmPositionAddPost);
 router.route("/movies").get(movies);
 router.route("/movies_add").get(moviesGet); // toob ette TÜHJA POST-formi
 router.route("/movies_add").post(movieAddPost); // saadab täidetud POST-formi teele
+router.route("/person_movie_position").get(relationMoviePersonPosition);
+router.route("/person_movie_position").post(relationMoviePersonPositionPost);
+router.route("/person_movie_relations").get(personMovieRelations);
 
 module.exports = router; // ekspordib kõik siin olevad route-id
 

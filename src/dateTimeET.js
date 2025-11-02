@@ -22,8 +22,10 @@ const dateNowFormattedET = function () {
 
 const timeNowFormattedET = function () {
     let timeNow = new Date();
-    return timeNow.getHours() + ":" + timeNow.getMinutes(); // + ":" + timeNow.getSeconds();
-}
+    const hours = timeNow.getHours();
+    const minutes = String(timeNow.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+};
 
 const weekDayNowET = function () {
     let timeNow = new Date();

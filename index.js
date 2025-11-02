@@ -10,7 +10,7 @@ const WisdomList = require("./src/wisdomList");
 const bodyparser = require("body-parser");
 const path = require("path");
 const textRef = path.join(__dirname, "../txt/vanasonad.txt");
-const visitorPath = "public/txt/visitlog.txt";
+// const visitorPath = "public/txt/visitlog.txt";
 const express = require("express");
 const dateEt = require("./src/dateTimeET");
 const { brotliDecompress } = require("zlib");
@@ -53,7 +53,7 @@ app.get("/", (req, res) => {
 
 app.get("/timenow", (req, res) => {
     const weekDayNow = dateEt.weekDay();
-    const dateNow = dateEt.fullTime();
+    const dateNow = dateEt.fullDate() + " " + dateEt.fullTime();
     res.render("timenow", { weekDayNow: weekDayNow, dateNow: dateNow });
 });
 
@@ -84,7 +84,7 @@ app.get("/vanasonad", (req, res) => {
     });
 });
 
-
+/*
 app.get("/regvisit", (req, res) => {
     res.render("regvisit");
 });
@@ -115,6 +115,7 @@ app.post("/regvisit", (req, res) => {
         }
     });
 });
+*/
 
 
 
@@ -138,7 +139,7 @@ app.post("/regvisit", (req, res) => {
 
 
 
-
+/*
 app.get("/visitors", (req, res) => {
     fs.readFile(visitorPath, "utf8", (err, data) => {
         if (err) {
@@ -150,10 +151,14 @@ app.get("/visitors", (req, res) => {
         res.render("visitors", { visitors });
     });
 });
+*/
 
 // Eesti filmi marsruudid olid siin enne (before cleanup), edasi:
 const eestifilmRouter = require("./routes/eestifilmRoutes");
 app.use("/Eestifilm", eestifilmRouter); // kui tuleb get /Eestifilm (vahet pole, mis /Eestifilm järel tuleb, peaasi et /Eestifilm on ees), siis kasutatakse eestifilmRouterit
+
+const visitRoutes = require("./routes/visitRoutes");
+app.use("/", visitRoutes);
 
 app.listen(5135, () => {
     console.log("Server running at http://localhost:5135/");

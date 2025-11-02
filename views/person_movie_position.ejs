@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="et">
+
+<head>
+  <meta charset="utf-8">
+  <title> |Testleht| </title>
+</head>
+
+<body>
+  <img src="images/vp_banner_2025_TA.jpg" alt="kursuse bänner" style="display: block; margin: 0 auto;">
+  <h1>MartinS, juuniorprogeja</h1>
+  <p>See leht on loodud <a href="https://www.tlu.ee/" target="_blank">TLU</a> veebiprogemise kursusel, ei sisalda tõsist
+    sisu</p>
+  <p>See rida on lisatud kodus ja läbi Putty ja WinSCP üles laetud.</p>
+  <p>Olen kokku puutunud Javascripti, Typescripti ja Javaga ning teinud mõned proovitööd ka tööpakkumistega seoses.</p>
+  <p>Hobikorras tegelen klaveriõppega, samuti olen tegelenud laskespordiga ja motokrossiga.</p>
+  <hr>
+  <!-- <hr> teeb horizontal rule, peenike jutt / riba -->
+
+  <ul>
+    <li><a href="/"> Avaleht </a></li>
+    <li><a href="/Eestifilm">Eesti filmide avaleht</a></li>
+  </ul>
+  <hr>
+  <h2> Inimesed, filmid ja rollid </h2>
+
+  <form method="POST">
+    <label for="personSelect">Isik / näitleja </label>
+    <select id="personSelect" name="personSelect" required>
+      <option selected disabled>Vali isik / näitleja</option>
+      <% personList.forEach(person=> { %>
+        <option value="<%= person.id %>">
+          <%= person.first_name + " " + person.last_name %>
+        </option>
+        <% }) %>
+    </select>
+
+    <br><br>
+
+    <label for="movieSelect">Film</label>
+    <select id="movieSelect" name="movieSelect" required>
+      <option selected disabled>Vali film</option>
+      <% movieList.forEach(movie=> { %>
+        <option value="<%= movie.id %>">
+          <%= movie.title %>
+        </option>
+        <% }) %>
+    </select>
+
+    <br><br>
+
+    <label for="positionSelect">Positsioon</label>
+    <select id="positionSelect" name="positionSelect" required>
+      <option selected disabled>Vali roll</option>
+      <% positionList.forEach(position=> { %>
+        <option value="<%= position.id %>">
+          <%= position.position_name %>
+        </option>
+        <% }) %>
+    </select>
+
+    <br><br>
+
+    <label for="rolenameInput"> Rolli / tegelase nimi </label>
+    <input id="rolenameInput" name="rolenameInput" type="text" placeholder=" Rolli / tegelase nimi " required>
+
+    <input id="relationSubmit" name="relationSubmit" type="submit" value="Salvesta seos andmebaasi">
+  </form>
+  <p>
+    Staatus: <%= notice %>
+  </p>
+</body>
+
+
+
+<style>
+  h1,
+  p,
+  img {
+    text-align: center;
+    margin: 20px;
+    font-family: Arial, sans-serif;
+  }
+</style>
+
+
+</html>
+
+<!-- moodle kursuse võti: VP2025TA -->
+<!-- parooli muutmiseks command: passwd -->
+<!-- väljumiseks: exit -->
+<!-- failide transpordiks: WinSCP -->
+<!-- tunneli server: lin2.tlu.ee -->
