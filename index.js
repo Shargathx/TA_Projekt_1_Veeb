@@ -24,8 +24,8 @@ app.set("view engine", "ejs");
 // määran päris kataloogi avalikult kättesaadavaks
 app.use(express.static("public"));
 
-// parsime päringu URL-i -> lipp false, kui ainult tekst, true, kui muid andmeid ka
-app.use(bodyparser.urlencoded({ extended: false }));
+// parsime päringu URL-i -> lipp false, kui ainult tekst; true, kui muid andmeid ka
+app.use(bodyparser.urlencoded({ extended: true }));
 
 // loon andmebaasi (DB) ühenduse: see viis on manuaalsem, alumine osa hakkab kasutama asnyc-meetodit
 /*
@@ -159,6 +159,10 @@ app.use("/Eestifilm", eestifilmRouter); // kui tuleb get /Eestifilm (vahet pole,
 
 const visitRoutes = require("./routes/visitRoutes");
 app.use("/", visitRoutes);
+
+// Galeriisse fotode ülesaadimiseks:
+const photoUpRouter = require("./routes/photoUpRoutes");
+app.use("/gallery_photo_upload", photoUpRouter);
 
 app.listen(5135, () => {
     console.log("Server running at http://localhost:5135/");
