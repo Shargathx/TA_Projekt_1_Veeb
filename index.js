@@ -44,10 +44,10 @@ const dbConfig = { // siin pole seda (ega ülemist vana versiooni) tglt enam vaj
     database: dbInfo.configData.dataBase
 }
 
-app.get("/", (req, res) => {
-    // res.send("Express.js läks käima ja serveerib veebi!"); // basic command, kirjutab midagi veebilehele
-    res.render("index");
-});
+// app.get("/", (req, res) => {
+//     // res.send("Express.js läks käima ja serveerib veebi!"); // basic command, kirjutab midagi veebilehele
+//     res.render("index");
+// });
 
 
 
@@ -83,6 +83,28 @@ app.get("/vanasonad", (req, res) => {
         listData: list.length ? list : ["Ei leidnud ühte vanasõna!"]
     });
 });
+
+app.get("/", async (req, res) => {
+    let conn;
+    let sqlReq = "SELECT filename, alt_text FROM multimeedia_db WHERE id=(SELECT MAX(id) FROM multimeedia_db WHERE privacy=? AND deleted IS NULL)";
+    const privacy = 3;
+    try {
+        conn = await mysql.createConnection(dbConfig);
+        const [rows] = await conn.execute(sqlReq, [privacy])
+        console.log(rows);
+        res.render("index", { photoList: rows }); 
+    }
+    catch(err) {
+        console.log("Viga!" + err);
+        res.render("index", { photoList: [] });
+    }
+    finally {
+        if (conn) { // kui ühendus ON olemas:
+            await conn.end(); // closes the DB connection
+            console.log("Connection ended!");
+        }
+    }
+})
 
 /*
 app.get("/regvisit", (req, res) => {

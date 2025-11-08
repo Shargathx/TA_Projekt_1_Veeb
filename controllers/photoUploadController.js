@@ -27,6 +27,7 @@ const photoUploadPagePost = async (req, res) => {
     let conn;
     console.log(req.body);
     console.log(req.file);
+    watermarkPath = "./public/gallery/vp_logo_small.png";
     try {
         // nime muutmine:
         const fileName = "vp_" + Date.now() + ".jpg";
@@ -34,7 +35,7 @@ const photoUploadPagePost = async (req, res) => {
         await fs.rename(req.file.path, req.file.destination + fileName);
 
         // suuruse muutmiseks (normaalasuurus, nt 800x600):
-        await sharp(req.file.destination + fileName).resize(800, 600).jpeg({ quality: 90 }).toFile("./public/gallery/normal/" + fileName);
+        await sharp(req.file.destination + fileName).resize(800, 600).composite([{input: watermarkPath, gravity: "southeast", blend: "over"}]).jpeg({ quality: 90 }).toFile("./public/gallery/normal/" + fileName);
         // võtab üleslaetava faili, muudab suuruse ja failitüübi (jpeg-ks, 90%-kvaliteediga), salvestab asukohta + nimega ^
 
         // thumbnail (100, 100):
@@ -64,6 +65,18 @@ const photoUploadPagePost = async (req, res) => {
         }
     }
 }
+
+
+module.exports = { photoUploadPagePost };   
+
+// IDEA FOR FUTURE, watermark as a helper method
+// const addWatermark = async (inputPath, outputPath, watermarkPath) => {
+//     await sharp(inputPath)
+//         .resize(800, 600)
+//         .composite([{ input: watermarkPath, gravity: "southeast" }])
+//         .jpeg({ quality: 90 })
+//         .toFile(outputPath);
+// };
 
 module.exports = {
     photoUploadPage,
