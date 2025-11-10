@@ -186,6 +186,10 @@ app.use("/", visitRoutes);
 const photoUpRouter = require("./routes/photoUpRoutes");
 app.use("/gallery_photo_upload", photoUpRouter);
 
+//Galerii marsruudid
+const galleryRouter = require("./routes/galleryRoutes");
+app.use("/photogallery", galleryRouter);
+
 app.listen(5135, () => {
     console.log("Server running at http://localhost:5135/");
 });

@@ -14,4 +14,5 @@ const {
 router.route("/").get(photoUploadPage); // siin aint "/", kuna index võtab by default selle aluseks
 router.route("/").post(uploader.single("photoInput"), photoUploadPagePost); // photoInput-ilt tuleb fail, see läheb uploaderist läbi ja alles siis POST-i
 
+
 module.exports = router;

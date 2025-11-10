@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="et">
+<!-- http://greeny.cs.tlu.ee/~rinde/2025_vp/TA/TA_veeb/views/ -->
+<head>
+    <meta charset="utf-8">
+    <title> |Testleht| </title>
+    <link rel="stylesheet" href="/style/gallery.css">
+    <script src="/script/gallery.js" defer>   </script>
+</head>
+
+<body>
+    <img src="images/vp_banner_2025_TA.jpg" alt="kursuse bänner" style="display: block; margin: 0 auto;">
+    <h1>MartinS, juuniorprogeja</h1>
+    <p>See leht on loodud <a href="https://www.tlu.ee/" target="_blank">TLU</a> veebiprogemise kursusel, ei sisalda
+        tõsist
+        sisu</p>
+    <p>See rida on lisatud kodus ja läbi Putty ja WinSCP üles laetud.</p>
+    <p>Olen kokku puutunud Javascripti, Typescripti ja Javaga ning teinud mõned proovitööd ka tööpakkumistega seoses.
+    </p>
+    <p>Hobikorras tegelen klaveriõppega, samuti olen tegelenud laskespordiga ja motokrossiga.</p>
+    <hr>
+
+    <ul>
+        <li><a href="/"> Avaleht </a></li>
+    </ul>
+    <hr>
+    <!-- dialoogi aken suuremate / normaalfotode näitamiseks -->
+    <dialog id="modal" class="modalarea">
+        <span id="modalClose" class="modalClose"> &times; </span>
+        <div id="modalGallery" class="modalHorizontal">
+            <div class="modalVertical">
+                <p id="modalCaption"></p>
+                <img id="modalImage" src="/images/empty.png" alt="galeriipilt">
+            </div>
+        </div>
+
+    </dialog>
+
+
+    <h2>Fotogalerii</h2>
+    <div id="gallery" class="gallery">
+        <% galleryData.forEach(function(image){ %>
+            <img src="<%= imagehref%><%= image.src%>" alt="<%= image.alt %>" class="thumbs"
+                data-filename="<%= image.src%>">
+            <% }); %>
+    </div>
+
+
+</body>
+
+</html>
