@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="et">
+
+<head>
+  <meta charset="utf-8">
+  <title> |Testleht| </title>
+</head>
+
+<body>
+  <img src="images/vp_banner_2025_TA.jpg" alt="kursuse bänner" style="display: block; margin: 0 auto;">
+  <h1>MartinS, juuniorprogeja</h1>
+  <p>See leht on loodud <a href="https://www.tlu.ee/" target="_blank">TLU</a> veebiprogemise kursusel, ei sisalda tõsist
+    sisu</p>
+  <p>See rida on lisatud kodus ja läbi Putty ja WinSCP üles laetud.</p>
+  <p>Olen kokku puutunud Javascripti, Typescripti ja Javaga ning teinud mõned proovitööd ka tööpakkumistega seoses.</p>
+  <p>Hobikorras tegelen klaveriõppega, samuti olen tegelenud laskespordiga ja motokrossiga.</p>
+  <hr>
+  <!-- <hr> teeb horizontal rule, peenike jutt / riba -->
+
+  <ul>
+    <li><a href="/"> Avaleht </a></li>
+    <li><a href="/news/upload"> Uue uudise lisamine </a></li>
+  </ul>
+  <hr>
+  <h2>Viimased uudised</h2>
+
+  <% if(news.length===0) { %>
+    <p>Hetkel pole aktiivseid uudiseid.</p>
+    <% } else { %>
+      <% news.forEach(item=> { %>
+        <div class="news-item">
+          <div class="news-title">
+            <%= item.title %>
+          </div>
+          <div class="news-date">Aegub: <%= new Date(item.expire).toLocaleDateString('et-EE') %>
+          </div>
+          <div class="news-content">
+            <%= item.content %>
+          </div>
+
+          <% if(item.photo_filename) { %>
+            <img src="/gallery/news/normal/<%= item.photo_filename %>" alt="<%= item.alt_text || 'Uudise pilt' %>">
+            <% } %>
+        </div>
+        <% }) %>
+          <% } %>
+</body>
+<!-- action="/Eestifilm/filmi_position_add -->
+
+</html>

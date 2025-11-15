@@ -25,6 +25,7 @@
     <li><a href="/Eestifilm">Siin on mõned Eesti filmid</a></li>
     <li><a href="/gallery_photo_upload">Ühe foto üleslaadimine</a></li>
     <li><a href="/photogallery">Galerii</a></li>
+    <li><a href="/news">Uudised</a></li>
   </ul>
 
   <h1> Viimati üleslaetud foto</h1>
@@ -35,12 +36,31 @@
         <p>Ühtegi fotot pole veel üles laaditud.</p>
         <% } %>
 
+          <br><br>
+
+          <h1> Värskeim uudis </h1>
+          <% if (latestNews) { %>
+            <h2>
+              <%= latestNews.title %>
+            </h2>
+            <p>
+              <%= latestNews.content %>
+            </p>
+
+            <% if (latestNews.photo_filename) { %>
+              <img src="/gallery/news/normal/<%= latestNews.photo_filename %>" alt="<%= latestNews.alt_text %>">
+              <% } %>
+
+                <% } else { %>
+                  <p>Uudiseid veel pole.</p>
+                  <% } %>
+
 
 </body>
 
 
 
-<style>
+<!-- <style>
   h1,
   p,
   img {
@@ -48,7 +68,7 @@
     margin: 20px;
     font-family: Arial, sans-serif;
   }
-</style>
+</style> -->
 
 
 </html>

@@ -86,17 +86,27 @@ app.get("/vanasonad", (req, res) => {
 
 app.get("/", async (req, res) => {
     let conn;
-    let sqlReq = "SELECT filename, alt_text FROM multimeedia_db WHERE id=(SELECT MAX(id) FROM multimeedia_db WHERE privacy=? AND deleted IS NULL)";
+    const sqlPhotoReq = "SELECT filename, alt_text FROM multimeedia_db WHERE id=(SELECT MAX(id) FROM multimeedia_db WHERE privacy=? AND deleted IS NULL)";
+    const sqlNewsReq = "SELECT title, content, photo_filename, alt_text FROM news_db WHERE expire > CURDATE() ORDER BY id DESC LIMIT 1";
     const privacy = 3;
     try {
         conn = await mysql.createConnection(dbConfig);
-        const [rows] = await conn.execute(sqlReq, [privacy])
+        const [newsRows] = await conn.execute(sqlNewsReq);
+        const latestNews = newsRows.length > 0 ? newsRows[0] : null;
+        console.log("NEWS ROWS:", latestNews);
+        const [rows] = await conn.execute(sqlPhotoReq, [privacy])
         console.log(rows);
-        res.render("index", { photoList: rows }); 
+        res.render("index", {
+            photoList: rows,
+            latestNews: latestNews
+        });
     }
-    catch(err) {
+    catch (err) {
         console.log("Viga!" + err);
-        res.render("index", { photoList: [] });
+        res.render("index", { 
+            photoList: [],
+            latestNews: [] 
+        });
     }
     finally {
         if (conn) { // kui ühendus ON olemas:
@@ -186,7 +196,11 @@ app.use("/", visitRoutes);
 const photoUpRouter = require("./routes/photoUpRoutes");
 app.use("/gallery_photo_upload", photoUpRouter);
 
-//Galerii marsruudid
+// Uudiste marsruut
+const newsRouter = require("./routes/newsRoutes");
+app.use("/news", newsRouter);
+
+// Galleri marsruut
 const galleryRouter = require("./routes/galleryRoutes");
 app.use("/photogallery", galleryRouter);
 
