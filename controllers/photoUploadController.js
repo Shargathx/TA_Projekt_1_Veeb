@@ -36,7 +36,7 @@ const photoUploadPagePost = async (req, res) => {
 
         // suuruse muutmiseks (normaalasuurus + watermark, nt 800x600):
         // TODO: watermark check, et kui seda faili pole, siis peaks ikkagi faili üles laadima, lihtsalt ilma watermark-ita
-        await sharp(req.file.destination + fileName).resize(800, 600).composite([{input: watermarkPath, gravity: "southeast", blend: "screen    "}]).jpeg({ quality: 90 }).toFile("./public/gallery/normal/" + fileName);
+        await sharp(req.file.destination + fileName).resize(800, 600).composite([{input: watermarkPath, gravity: "southeast", blend: "over"}]).jpeg({ quality: 90 }).toFile("./public/gallery/normal/" + fileName);
         // võtab üleslaetava faili, muudab suuruse ja failitüübi (jpeg-ks, 90%-kvaliteediga), salvestab asukohta + nimega ^
 
         // thumbnail (100, 100):
