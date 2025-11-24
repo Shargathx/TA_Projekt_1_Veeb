@@ -2,6 +2,8 @@
 // const mysql = require("mysql2"); // (installed via console "npm install mysql2") // välja commented, kuna kasutame async-i edaspidi, siis impordime 'mysql2/promise' mooduli (allpool)
 const mysql = require("mysql2/promise");
 const dbInfo = require("../../../vp2025config"); // 3 kausta väljaspool
+const session = require("express-session");
+const loginCheck = require("./src/checkLogin");
 
 const fs = require("fs");
 const WisdomList = require("./src/wisdomList");
@@ -17,6 +19,7 @@ const { brotliDecompress } = require("zlib");
 
 // käivitab express.js funktsiooni, annab nimeks "app"
 const app = express();
+app.use(session({ secret: dbInfo.configData.sessionSecret, saveUninitialized: true, resave: true }));
 
 // määran veebilehtede mallide renderdamise mootori (viewEngine)
 app.set("view engine", "ejs");
@@ -103,9 +106,9 @@ app.get("/", async (req, res) => {
     }
     catch (err) {
         console.log("Viga!" + err);
-        res.render("index", { 
+        res.render("index", {
             photoList: [],
-            latestNews: [] 
+            latestNews: []
         });
     }
     finally {
@@ -185,6 +188,18 @@ app.get("/visitors", (req, res) => {
 });
 */
 
+// sisse loginud kasutajate osa avaleht:
+app.get("/home", loginCheck.isLogin, (req, res) => {
+    console.log("Sisse logis kasutaja: " + req.session.userId);
+    res.render("home", { user: req.session.firstName + " " + req.session.lastName });
+});
+
+// välja logimine:
+app.get("/logout", (req, res) => { // peab tulema ENNE all olevaid marsruute, et ei tekiks errorit
+    req.session.destroy(); // kustutab / hävitab sessiooni
+    console.log("Välja logitud");
+    res.redirect("/");
+});
 // Eesti filmi marsruudid olid siin enne (before cleanup), edasi:
 const eestifilmRouter = require("./routes/eestifilmRoutes");
 app.use("/Eestifilm", eestifilmRouter); // kui tuleb get /Eestifilm (vahet pole, mis /Eestifilm järel tuleb, peaasi et /Eestifilm on ees), siis kasutatakse eestifilmRouterit
@@ -207,6 +222,10 @@ app.use("/photogallery", galleryRouter);
 // Konto loomise marsruudid
 const signupRouter = require("./routes/signupRoutes");
 app.use("/signup", signupRouter);
+
+// Sisselogimise marsruudid
+const signinRouter = require("./routes/signinRoutes");
+app.use("/signin", signinRouter);
 
 app.listen(5135, () => {
     console.log("Server running at http://localhost:5135/");

@@ -24,6 +24,7 @@ const signupPage = (req, res) => { // Router kasutab seda funktsiooni
 
 const signupPagePost = async (req, res) => {
     let conn;
+    let notice = "";
     console.log(req.body);
     console.log(req.file);
 
@@ -37,21 +38,29 @@ const signupPagePost = async (req, res) => {
         req.body.passwordInput.length < 8 ||
         req.body.passwordInput !== req.body.confirmPasswordInput
     ) {
-        let notice = "Andmeid on puudu või vigased!"
+        notice = "Andmeid on puudu või vigased!"
         console.log(notice);
         return res.render("signup", { notice: notice });
     }
 
     try {
+        conn = await mysql.createConnection(dbConfig);
+        // kontrollin varasemat kasutajanime olemasolu:
+        let sqlReq = "SELECT id from users WHERE email = ?";
+        const [users] = await conn.execute(sqlReq, [req.body.emailInput]);
+        if (users.length > 0) {
+            notice = "Selline kasutaja juba eksisteerib!";
+            console.log(notice);
+            return res.render("signup", { notice: notice });
+        }
+        
         // installed argon2 via "npm install argon2"
         // krüpteerime parooli:
         const pwdHash = await argon2.hash(req.body.passwordInput);
         console.log(pwdHash);
         console.log(pwdHash.length);
 
-        conn = await mysql.createConnection(dbConfig);
-
-        let sqlReq = "INSERT INTO users (first_name, last_name, birth_date, gender, email, password) VALUES (?, ?, ?, ?, ?, ?)"
+        sqlReq = "INSERT INTO users (first_name, last_name, birth_date, gender, email, password) VALUES (?, ?, ?, ?, ?, ?)"
 
         const [result] = await conn.execute(sqlReq, [
             req.body.firstNameInput,

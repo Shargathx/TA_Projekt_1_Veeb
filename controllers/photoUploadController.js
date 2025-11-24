@@ -46,7 +46,7 @@ const photoUploadPagePost = async (req, res) => {
         let sqlReq = "INSERT INTO multimeedia_db (filename, orig_name, alt_text, privacy, userId) VALUES (?, ?, ?, ?, ?)";
 
         // kuna kasutajakontosid veel pole, siis määrame userId = 1
-        const userID = 1;
+        const userID = req.session.userId;
         // const altText = req.body.altInput || null;
         // const privacy = req.body.privacyInput || null;
         const [result] = await conn.execute(sqlReq, [fileName, req.file.originalname, req.body.altInput, req.body.privacyInput, userID]);

@@ -1,6 +1,10 @@
 const express = require("express");
+const loginCheck = require("../src/checkLogin");
 
 const router = express.Router();
+router.use(loginCheck.isLogin);
+
+
 
 //kontrollerid
 const {
