@@ -40,14 +40,29 @@
     </dialog>
 
 
-    <h2>Fotogalerii</h2>
-    <p> <%- links %></p>
-    <div id="gallery" class="gallery">
-        <% galleryData.forEach(function(image){ %>
-            <img src="<%= imagehref %><%= image.src %>" alt="<%= image.alt %>" class="thumbs"
-                data-filename="<%= image.src %>" data-owner="<%= image.owner %>">
-            <% }); %>
+    <h2>Muuda andmeid</h2>
+    <div class="edit-photo-form">
+        <img src="<%= imagehref %><%= photo.filename %>" alt="<%= photo.alt_text || 'Galeriipilt' %>" class="thumbs">
+
+        <form action="/photogallery/myphotos/<%= photo.id %>/edit" method="POST">
+            <label for="altInput">Pildi alternatiivtekst:</label>
+            <input type="text" id="altInput" name="altInput" value="<%= photo.alt_text %>"
+                placeholder="Sellel pildil on ...">
+                
+            <input id="privacyInput1" name="privacyInput" type="radio" value="1">
+            <label for="privacyInput1"> Privaatne </label>
+
+            <input id="privacyInput2" name="privacyInput" type="radio" value="2">
+            <label for="privacyInput2"> Sisseloginud kasutajatele </label>
+
+            <input id="privacyInput3" name="privacyInput" type="radio" value="3" checked>
+            <label for="privacyInput3"> Avalik / kõigile </label>
+
+            <br><br>
+            <button type="submit">Salvesta muudatused</button>
+        </form>
     </div>
+
 
 
 </body>

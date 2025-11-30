@@ -15,16 +15,143 @@ const dbConf = {
 //@route GET /photogallery
 //@access public
 
-const galleryHome = async (req, res)=>{
-	 res.redirect("/photogallery/1");
+const galleryHome = async (req, res) => {
+	res.redirect("/photogallery/1");
 };
 
-const galleryPage = async (req, res)=>{
+const myGalleryPage = async (req, res) => {
 	let conn;
 	const photoLimit = 4;
 	const privacy = 2;
 	console.log(req.params);
 	let page = parseInt(req.params.page);
+	let skip = 0;
+	const userId = req.session.userId
+
+
+	try {
+		// kontrollin et poleks liiga väike lehekülg
+		if (page < 1 || isNaN(page)) {
+			page = 1 // vägisi page number = 1
+		}
+
+		// vaatame, palju on fotosid kokku
+		conn = await mysql.createConnection(dbConf);
+		let sqlReq = "SELECT COUNT(id) AS photos FROM multimeedia_db WHERE userId = ? AND privacy >= ? AND DELETED IS NULL";
+		const [countResult] = await conn.execute(sqlReq, [userId, privacy]);
+		const photoCount = countResult[0].photos; // sest SQL otsis AS "photos"
+
+		// parandame leheküljenumbri, kui see on valitud liiga suur
+		if ((page - 1) * photoLimit >= photoCount) {
+			page = Math.max(1, Math.ceil(photoCount / photoLimit));
+		}
+		let skip = (page - 1) * photoLimit
+
+		// navigatsioonilinkide loomine
+		// eelmine leht:
+		if (page === 1) {
+			galleryLinks = "Eelmine leht &nbsp;&nbsp;&nbsp;| &nbsp;&nbsp;&nbsp;" // &nbsp - non-breakable space, jätab sisse tühikud
+		} else {
+			galleryLinks = `<a href="/photogallery/${page - 1}"> Eelmine leht </a> &nbsp;&nbsp;&nbsp;| &nbsp;&nbsp;&nbsp;`;
+		}
+		if (page * photoLimit >= photoCount) {
+			galleryLinks += "Järgmine leht";
+		} else {
+			galleryLinks += `<a href="/photogallery/${page + 1}"> Järgmine leht </a>`;
+		}
+
+
+		console.log(galleryLinks);
+
+
+		// fotode DB-st lugemine:
+		sqlReq = "SELECT id, filename, alt_text FROM multimeedia_db WHERE userId = ? AND privacy >= ? AND deleted IS NULL LIMIT ?, ?"; // limiti esimene ? = mitu vahele jätta, teine ? = mitu tk näidata
+
+		const [rows, fields] = await conn.execute(sqlReq, [userId, privacy, skip, photoLimit]);
+		console.log(rows);
+		let galleryData = [];
+		for (let i = 0; i < rows.length; i++) {
+			let altText = "Galeriipilt";
+			if (rows[i].alt_text != "") {
+				altText = rows[i].alt_text;
+			}
+			galleryData.push({ id: rows[i].id, src: rows[i].filename, alt: altText });
+		}
+		res.render("my_gallery", { galleryData: galleryData, imagehref: "/gallery/thumbs/", links: galleryLinks });
+	}
+	catch (err) {
+		console.log(err);
+		res.render("my_gallery", { listData: [], imagehref: "/gallery/thumbs/", links: "" });
+	}
+	finally {
+		if (conn) {
+			await conn.end();
+			console.log("Andmebaasiühendus on suletud!");
+		}
+	}
+};
+
+const mySinglePhoto = async (req, res) => {
+	const userId = req.session.userId;
+	const photoId = req.params.id;
+
+	if (!userId) {
+		return res.redirect("/login");
+	}
+
+	try {
+		const conn = await mysql.createConnection(dbConf);
+		const [rows] = await conn.execute("SELECT * FROM multimeedia_db WHERE id = ? AND userId = ? AND deleted IS NULL", [photoId, userId]);
+
+		if (rows.length === 0) {
+			return res.status(404).send("Photo not found");
+		}
+
+		const photo = rows[0];
+		res.render("mySinglePhoto", {
+			photo,
+			imagehref: "/gallery/thumbs/"
+		});
+
+		await conn.end();
+	} catch (err) {
+		console.error(err);
+		res.status(500).send("Server error");
+	}
+};
+
+const updatePhoto = async (req, res) => {
+	const userId = req.session.userId;
+	const photoId = req.params.id;
+	const { altInput, privacyInput } = req.body;
+
+	if (!userId) {
+		return res.redirect("/login");
+	}
+
+	try {
+		const conn = await mysql.createConnection(dbConf);
+		const sqlReq = "UPDATE multimeedia_db SET alt_text = ?, privacy = ? WHERE id = ? AND userId = ?";
+		await conn.execute(sqlReq, [altInput, privacyInput, photoId, userId]);
+		await conn.end();
+
+		res.redirect("/photogallery/myGallery");
+	} catch (err) {
+		console.error(err);
+		res.status(500).send("Server error");
+	}
+};
+
+
+
+
+const galleryPage = async (req, res) => {
+	let conn;
+	const photoLimit = 4;
+	const privacy = 2;
+	console.log(req.params);
+	let page = parseInt(req.params.page);
+	const userId = req.session.userId;
 	let skip = 0;
 
 	try {
@@ -54,7 +181,7 @@ const galleryPage = async (req, res)=>{
 		}
 		if (page * photoLimit >= photoCount) {
 			galleryLinks += "Järgmine leht";
-		} else{
+		} else {
 			galleryLinks += `<a href="/photogallery/${page + 1}"> Järgmine leht </a>`;
 		}
 
@@ -63,29 +190,29 @@ const galleryPage = async (req, res)=>{
 
 
 		// fotode DB-st lugemine:
-		sqlReq = "SELECT filename, alt_text FROM multimeedia_db WHERE privacy >= ? AND deleted IS NULL LIMIT ?, ?"; // limiti esimene ? = mitu vahele jätta, teine ? = mitu tk näidata
+		sqlReq = "SELECT m.id, m.filename, m.alt_text, u.first_name, u.last_name FROM multimeedia_db m JOIN users u ON m.userId = u.id WHERE m.privacy >= ? AND m.deleted IS NULL LIMIT ?, ?"; // limiti esimene ? = mitu vahele jätta, teine ? = mitu tk näidata
 
 		const [rows, fields] = await conn.execute(sqlReq, [privacy, skip, photoLimit]);
 		console.log(rows);
 		let galleryData = [];
-		for (let i = 0; i < rows.length; i ++){
+		for (let i = 0; i < rows.length; i++) {
 			let altText = "Galeriipilt";
-			if(rows[i].alt_text != ""){
+			if (rows[i].alt_text != "") {
 				altText = rows[i].alt_text;
 			}
-			galleryData.push({src: rows[i].filename, alt: altText});
+			galleryData.push({id: rows[i].id, src: rows[i].filename, alt: altText, owner: rows[i].first_name + " " + rows[i].last_name });
 		}
-		res.render("gallery", {galleryData: galleryData, imagehref: "/gallery/thumbs/", links: galleryLinks});
+		res.render("gallery", { galleryData: galleryData, imagehref: "/gallery/thumbs/", links: galleryLinks });
 	}
-	catch(err){
+	catch (err) {
 		console.log(err);
-		res.render("gallery", {listData: [], imagehref: "/gallery/thumbs/", links: ""});
+		res.render("gallery", { galleryData: [], imagehref: "/gallery/thumbs/", links: "" });
 	}
 	finally {
-	  if(conn){
-	    await conn.end();
-	    console.log("AndmebaasiÃ¼hendus on suletud!");
-	  }
+		if (conn) {
+			await conn.end();
+			console.log("AndmebaasiÃ¼hendus on suletud!");
+		}
 	}
 };
 
@@ -93,5 +220,8 @@ const galleryPage = async (req, res)=>{
 
 module.exports = {
 	galleryHome,
-	galleryPage
+	galleryPage,
+	myGalleryPage,
+	mySinglePhoto,
+	updatePhoto
 };
