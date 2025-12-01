@@ -1,15 +1,12 @@
 const mysql = require("mysql2/promise");
-const dbInfo = require("../../../../vp2025config");
+const pool = require("../src/dbPool");
 
-
-
-
-const dbConf = {
-	host: dbInfo.configData.host,
-	user: dbInfo.configData.user,
-	password: dbInfo.configData.passWord,
-	database: dbInfo.configData.dataBase
-};
+// const dbConf = {
+// 	host: dbInfo.configData.host,
+// 	user: dbInfo.configData.user,
+// 	password: dbInfo.configData.passWord,
+// 	database: dbInfo.configData.dataBase
+// };
 
 //@desc home page for photogallery
 //@route GET /photogallery
@@ -20,14 +17,12 @@ const galleryHome = async (req, res) => {
 };
 
 const myGalleryPage = async (req, res) => {
-	let conn;
 	const photoLimit = 4;
 	const privacy = 2;
 	console.log(req.params);
 	let page = parseInt(req.params.page);
 	let skip = 0;
 	const userId = req.session.userId
-
 
 	try {
 		// kontrollin et poleks liiga väike lehekülg
@@ -36,9 +31,8 @@ const myGalleryPage = async (req, res) => {
 		}
 
 		// vaatame, palju on fotosid kokku
-		conn = await mysql.createConnection(dbConf);
 		let sqlReq = "SELECT COUNT(id) AS photos FROM multimeedia_db WHERE userId = ? AND privacy >= ? AND DELETED IS NULL";
-		const [countResult] = await conn.execute(sqlReq, [userId, privacy]);
+		const [countResult] = await pool.execute(sqlReq, [userId, privacy]);
 		const photoCount = countResult[0].photos; // sest SQL otsis AS "photos"
 
 		// parandame leheküljenumbri, kui see on valitud liiga suur
@@ -67,7 +61,7 @@ const myGalleryPage = async (req, res) => {
 		// fotode DB-st lugemine:
 		sqlReq = "SELECT id, filename, alt_text FROM multimeedia_db WHERE userId = ? AND privacy >= ? AND deleted IS NULL LIMIT ?, ?"; // limiti esimene ? = mitu vahele jätta, teine ? = mitu tk näidata
 
-		const [rows, fields] = await conn.execute(sqlReq, [userId, privacy, skip, photoLimit]);
+		const [rows, fields] = await pool.execute(sqlReq, [userId, privacy, skip, photoLimit]);
 		console.log(rows);
 		let galleryData = [];
 		for (let i = 0; i < rows.length; i++) {
@@ -84,10 +78,7 @@ const myGalleryPage = async (req, res) => {
 		res.render("my_gallery", { listData: [], imagehref: "/gallery/thumbs/", links: "" });
 	}
 	finally {
-		if (conn) {
-			await conn.end();
-			console.log("Andmebaasiühendus on suletud!");
-		}
+		console.log("DB ühendus lõppes");
 	}
 };
 
@@ -100,8 +91,7 @@ const mySinglePhoto = async (req, res) => {
 	}
 
 	try {
-		const conn = await mysql.createConnection(dbConf);
-		const [rows] = await conn.execute("SELECT * FROM multimeedia_db WHERE id = ? AND userId = ? AND deleted IS NULL", [photoId, userId]);
+		const [rows] = await pool.execute("SELECT * FROM multimeedia_db WHERE id = ? AND userId = ? AND deleted IS NULL", [photoId, userId]);
 
 		if (rows.length === 0) {
 			return res.status(404).send("Photo not found");
@@ -113,7 +103,6 @@ const mySinglePhoto = async (req, res) => {
 			imagehref: "/gallery/thumbs/"
 		});
 
-		await conn.end();
 	} catch (err) {
 		console.error(err);
 		res.status(500).send("Server error");
@@ -130,10 +119,8 @@ const updatePhoto = async (req, res) => {
 	}
 
 	try {
-		const conn = await mysql.createConnection(dbConf);
 		const sqlReq = "UPDATE multimeedia_db SET alt_text = ?, privacy = ? WHERE id = ? AND userId = ?";
-		await conn.execute(sqlReq, [altInput, privacyInput, photoId, userId]);
-		await conn.end();
+		await pool.execute(sqlReq, [altInput, privacyInput, photoId, userId]);
 
 		res.redirect("/photogallery/myGallery");
 	} catch (err) {
@@ -146,7 +133,6 @@ const updatePhoto = async (req, res) => {
 
 
 const galleryPage = async (req, res) => {
-	let conn;
 	const photoLimit = 4;
 	const privacy = 2;
 	console.log(req.params);
@@ -161,9 +147,8 @@ const galleryPage = async (req, res) => {
 		}
 
 		// vaatame, palju on fotosid kokku
-		conn = await mysql.createConnection(dbConf);
 		let sqlReq = "SELECT COUNT(id) AS photos FROM multimeedia_db WHERE privacy >= ? AND DELETED IS NULL";
-		const [countResult] = await conn.execute(sqlReq, [privacy]);
+		const [countResult] = await pool.execute(sqlReq, [privacy]);
 		const photoCount = countResult[0].photos; // sest SQL otsis AS "photos"
 
 		// parandame leheküljenumbri, kui see on valitud liiga suur
@@ -192,7 +177,7 @@ const galleryPage = async (req, res) => {
 		// fotode DB-st lugemine:
 		sqlReq = "SELECT m.id, m.filename, m.alt_text, u.first_name, u.last_name FROM multimeedia_db m JOIN users u ON m.userId = u.id WHERE m.privacy >= ? AND m.deleted IS NULL LIMIT ?, ?"; // limiti esimene ? = mitu vahele jätta, teine ? = mitu tk näidata
 
-		const [rows, fields] = await conn.execute(sqlReq, [privacy, skip, photoLimit]);
+		const [rows, fields] = await pool.execute(sqlReq, [privacy, skip, photoLimit]);
 		console.log(rows);
 		let galleryData = [];
 		for (let i = 0; i < rows.length; i++) {
@@ -209,10 +194,7 @@ const galleryPage = async (req, res) => {
 		res.render("gallery", { galleryData: [], imagehref: "/gallery/thumbs/", links: "" });
 	}
 	finally {
-		if (conn) {
-			await conn.end();
-			console.log("AndmebaasiÃ¼hendus on suletud!");
-		}
+			console.log("DB ühendus on suletud!");
 	}
 };
 

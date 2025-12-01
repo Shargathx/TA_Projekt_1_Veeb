@@ -1,13 +1,14 @@
 const mysql = require("mysql2/promise");
 const dbInfo = require("../../../../vp2025config"); // 4 kausta väljaspool
 const argon2 = require("argon2");
+const pool = require("../src/dbPool");
 
-const dbConfig = {
-    host: dbInfo.configData.host,
-    user: dbInfo.configData.user,
-    password: dbInfo.configData.passWord,
-    database: dbInfo.configData.dataBase
-}
+// const dbConfig = {
+//     host: dbInfo.configData.host,
+//     user: dbInfo.configData.user,
+//     password: dbInfo.configData.passWord,
+//     database: dbInfo.configData.dataBase
+// }
 
 // @desc home page for empty signin page
 // @route GET /signin
@@ -23,7 +24,6 @@ const signinPage = (req, res) => { // Router kasutab seda funktsiooni
 //@access public
 
 const signinPagePost = async (req, res) => {
-    let conn;
     console.log(req.body);
     console.log(req.file);
 
@@ -38,10 +38,8 @@ const signinPagePost = async (req, res) => {
     }
 
     try {
-        conn = await mysql.createConnection(dbConfig);
-
         let sqlReq = "SELECT id, password FROM users WHERE email = ?";
-        const [users] = await conn.execute(sqlReq, [req.body.emailInput]);
+        const [users] = await pool.execute(sqlReq, [req.body.emailInput]);
         // kas sellise meiliga kasutaja leiti:
         if (users.length === 0) {
             return res.render("signin", { notice: "Kasutajatunnus ja/või parool on vale!" });
@@ -59,7 +57,7 @@ const signinPagePost = async (req, res) => {
             // paneme sessiooni käima ja määrame sessiooni ühe muutuja
             req.session.userId = user.id;
             sqlReq = "SELECT first_name, last_name FROM users WHERE id = ?";
-            const [loginUser] = await conn.execute(sqlReq, [req.session.userId]);
+            const [loginUser] = await pool.execute(sqlReq, [req.session.userId]);
             req.session.firstName = loginUser[0].first_name;
             req.session.lastName = loginUser[0].last_name;
             return res.redirect("/home");
@@ -78,9 +76,6 @@ const signinPagePost = async (req, res) => {
 
     }
     finally {
-        if (conn) {
-            await conn.end();
-        }
     }
 }
 

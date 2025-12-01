@@ -1,10 +1,12 @@
 // SQL andmebaasi mooduli kasutamine / aktiveerimine
 // const mysql = require("mysql2"); // (installed via console "npm install mysql2") // välja commented, kuna kasutame async-i edaspidi, siis impordime 'mysql2/promise' mooduli (allpool)
+// installed .env handler: npm install dotenv
 const mysql = require("mysql2/promise");
+require("dotenv").config();
 const dbInfo = require("../../../vp2025config"); // 3 kausta väljaspool
 const session = require("express-session");
 const loginCheck = require("./src/checkLogin");
-
+const pool = require("./src/dbPool");
 const fs = require("fs");
 const WisdomList = require("./src/wisdomList");
 
@@ -19,7 +21,8 @@ const { brotliDecompress } = require("zlib");
 
 // käivitab express.js funktsiooni, annab nimeks "app"
 const app = express();
-app.use(session({ secret: dbInfo.configData.sessionSecret, saveUninitialized: true, resave: true }));
+// app.use(session({ secret: dbInfo.configData.sessionSecret, saveUninitialized: true, resave: true }));
+app.use(session({ secret: process.env.SES_SECRET, saveUninitialized: true, resave: true })); // <-- ^ asendame DB info pool ja env infoga
 
 // määran veebilehtede mallide renderdamise mootori (viewEngine)
 app.set("view engine", "ejs");
@@ -29,16 +32,6 @@ app.use(express.static("public"));
 
 // parsime päringu URL-i -> lipp false, kui ainult tekst; true, kui muid andmeid ka
 app.use(bodyparser.urlencoded({ extended: true }));
-
-// loon andmebaasi (DB) ühenduse: see viis on manuaalsem, alumine osa hakkab kasutama asnyc-meetodit
-/*
-const conn = mysql.createConnection({
-    host: dbInfo.configData.host,
-    user: dbInfo.configData.user,
-    password: dbInfo.configData.passWord,
-    database: dbInfo.configData.dataBase
-});
-*/
 
 const dbConfig = { // siin pole seda (ega ülemist vana versiooni) tglt enam vaja, kuna see kolis ümber Controllerisse, aga jätan näitamise eesmärgil veel siia
     host: dbInfo.configData.host,
@@ -60,23 +53,6 @@ app.get("/timenow", (req, res) => {
     res.render("timenow", { weekDayNow: weekDayNow, dateNow: dateNow });
 });
 
-
-
-
-// THE COMMENTED PART IS ONE WAY OF DOING IT, BUT SINCE I HAVE THE WISDOMLIST.JS, I CAN JUST CALL UPON THAT
-// app.get("/vanasonad", (req, res) => {
-//     fs.readFile(textRef, "utf8", (err, data) => {
-//         if (err) {
-//             // kui error, siis ikka väljastab veebilehe, lihtsalt vanasõnu pole ühtegi
-//             res.render("genericlist", { heading: "Vanasonade list", listData: ["Ei leidnud ühtegi vanasõna!"] });
-//         }
-//         else {
-//             folkWisdom = data.split(";");
-//             res.render("genericlist", { heading: "Vanasonade list", listData: folkWisdom });
-//         }
-//     });
-// });
-
 app.get("/vanasonad", (req, res) => {
     const randomWisdom = WisdomList.getSingleWisdomSaying();
     const list = WisdomList.generateAllVanasonad();
@@ -88,16 +64,14 @@ app.get("/vanasonad", (req, res) => {
 });
 
 app.get("/", async (req, res) => {
-    let conn;
     const sqlPhotoReq = "SELECT filename, alt_text FROM multimeedia_db WHERE id=(SELECT MAX(id) FROM multimeedia_db WHERE privacy=? AND deleted IS NULL)";
     const sqlNewsReq = "SELECT title, content, photo_filename, alt_text FROM news_db WHERE expire > CURDATE() ORDER BY id DESC LIMIT 1";
     const privacy = 3;
     try {
-        conn = await mysql.createConnection(dbConfig);
-        const [newsRows] = await conn.execute(sqlNewsReq);
+        const [newsRows] = await pool.execute(sqlNewsReq);
         const latestNews = newsRows.length > 0 ? newsRows[0] : null;
         console.log("NEWS ROWS:", latestNews);
-        const [rows] = await conn.execute(sqlPhotoReq, [privacy])
+        const [rows] = await pool.execute(sqlPhotoReq, [privacy])
         console.log(rows);
         res.render("index", {
             photoList: rows,
@@ -112,14 +86,9 @@ app.get("/", async (req, res) => {
         });
     }
     finally {
-        if (conn) { // kui ühendus ON olemas:
-            await conn.end(); // closes the DB connection
-            console.log("Connection ended!");
-        }
     }
 })
 
-/*
 app.get("/regvisit", (req, res) => {
     res.render("regvisit");
 });
@@ -150,43 +119,6 @@ app.post("/regvisit", (req, res) => {
         }
     });
 });
-*/
-
-
-
-
-// app.get("/visitors", (req, res) => {
-//     fs.readFile(visitorPath, "utf8", (err, data) => {
-//         if (err) {
-//             console.error(err);
-//             return res.render("visitors", { visitors: ["Ei leitud ühtegi külastust!"] });
-//         }
-//         // splitib iga külastuse uuele reale (eemaldab ka tühjad kohad / tühikud, VARUVARIANT, kasutab PUSH meetodit / commandi)
-//         else {
-//             listData = data.split(";");
-//             let correctListData = [];
-//             for (let i = 0; i < listData.length - 1; i++) {
-//                 correctListData.push(listData[i]);
-//             }
-//             res.render("visitors", { visitors });
-//         });
-// });
-
-
-
-/*
-app.get("/visitors", (req, res) => {
-    fs.readFile(visitorPath, "utf8", (err, data) => {
-        if (err) {
-            console.error(err);
-            return res.render("visitors", { visitors: ["Ei leitud ühtegi külastust!"] });
-        }
-        // splitib iga külastuse uuele reale (eemaldab ka tühjad kohad ja read / tühikud)
-        const visitors = data.split("\n").filter(line => line.trim() !== "");
-        res.render("visitors", { visitors });
-    });
-});
-*/
 
 // sisse loginud kasutajate osa avaleht:
 app.get("/home", loginCheck.isLogin, (req, res) => {

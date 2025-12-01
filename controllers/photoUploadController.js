@@ -2,13 +2,7 @@ const mysql = require("mysql2/promise");
 const fs = require("fs").promises;
 const sharp = require("sharp");
 const dbInfo = require("../../../../vp2025config"); // 4 kausta väljaspool
-
-const dbConfig = {
-    host: dbInfo.configData.host,
-    user: dbInfo.configData.user,
-    password: dbInfo.configData.passWord,
-    database: dbInfo.configData.dataBase
-}
+const pool = require("../src/dbPool");
 
 // @desc home pag for uploading photos
 // @route GET /galleryphotoupload
@@ -24,7 +18,6 @@ const photoUploadPage = (req, res) => { // Router kasutab seda funktsiooni
 //@access public
 
 const photoUploadPagePost = async (req, res) => {
-    let conn;
     console.log(req.body);
     console.log(req.file);
     watermarkPath = "./public/gallery/vp_logo_small.png";
@@ -36,20 +29,19 @@ const photoUploadPagePost = async (req, res) => {
 
         // suuruse muutmiseks (normaalasuurus + watermark, nt 800x600):
         // TODO: watermark check, et kui seda faili pole, siis peaks ikkagi faili üles laadima, lihtsalt ilma watermark-ita
-        await sharp(req.file.destination + fileName).resize(800, 600).composite([{input: watermarkPath, gravity: "southeast", blend: "over"}]).jpeg({ quality: 90 }).toFile("./public/gallery/normal/" + fileName);
+        await sharp(req.file.destination + fileName).resize(800, 600).composite([{ input: watermarkPath, gravity: "southeast", blend: "over" }]).jpeg({ quality: 90 }).toFile("./public/gallery/normal/" + fileName);
         // võtab üleslaetava faili, muudab suuruse ja failitüübi (jpeg-ks, 90%-kvaliteediga), salvestab asukohta + nimega ^
 
         // thumbnail (100, 100):
         await sharp(req.file.destination + fileName).resize(100, 100).jpeg({ quality: 90 }).toFile("./public/gallery/thumbs/" + fileName);
 
-        conn = await mysql.createConnection(dbConfig);
         let sqlReq = "INSERT INTO multimeedia_db (filename, orig_name, alt_text, privacy, userId) VALUES (?, ?, ?, ?, ?)";
 
         // kuna kasutajakontosid veel pole, siis määrame userId = 1
         const userID = req.session.userId;
         // const altText = req.body.altInput || null;
         // const privacy = req.body.privacyInput || null;
-        const [result] = await conn.execute(sqlReq, [fileName, req.file.originalname, req.body.altInput, req.body.privacyInput, userID]);
+        const [result] = await pool.execute(sqlReq, [fileName, req.file.originalname, req.body.altInput, req.body.privacyInput, userID]);
         console.log("Salvestati kirje: " + result.insertId);
 
         res.render("gallery_photo_upload");
@@ -60,14 +52,11 @@ const photoUploadPagePost = async (req, res) => {
 
     }
     finally {
-        if (conn) {
-            await conn.end();
-            console.log("Connection ended!");
-        }
+        console.log("Connection ended!");
     }
 }
 
-module.exports = { photoUploadPagePost };   
+module.exports = { photoUploadPagePost };
 
 // IDEA FOR FUTURE, watermark as a helper method
 // const addWatermark = async (inputPath, outputPath, watermarkPath) => {

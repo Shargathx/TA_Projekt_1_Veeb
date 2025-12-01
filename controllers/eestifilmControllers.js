@@ -1,12 +1,5 @@
 const mysql = require("mysql2/promise");
-const dbInfo = require("../../../../vp2025config"); // 4 kausta väljaspool
-
-const dbConfig = {
-    host: dbInfo.configData.host,
-    user: dbInfo.configData.user,
-    password: dbInfo.configData.passWord,
-    database: dbInfo.configData.dataBase
-}
+const pool = require("../src/dbPool");
 
 // @desc home pag for Estonian Film section
 // @route GET /Eestifilm
@@ -23,12 +16,10 @@ const eestifilm = (req, res) => { // Router kasutab seda funktsiooni
 
 // app.get("/Eestifilm/inimesed", async (req, res) => { // vana viis, enne jagamist)
 const inimesed = async (req, res) => {
-    let conn; // connection
     const sqlReq = "SELECT * FROM person";
     try {
-        conn = await mysql.createConnection(dbConfig);
         console.log("DB ühendus loodud!");
-        const [rows, fields] = await conn.execute(sqlReq); // saadab selle ülevalpool nimetatud asja (sqlReq const) välja, salvestab selle massiivi! rows ja fields, kuna tegemist on SELECT käsuga
+        const [rows, fields] = await pool.execute(sqlReq); // saadab selle ülevalpool nimetatud asja (sqlReq const) välja, salvestab selle massiivi! rows ja fields, kuna tegemist on SELECT käsuga
         res.render("filmiinimesed", { personList: rows });
     }
     catch (err) {
@@ -36,10 +27,7 @@ const inimesed = async (req, res) => {
         res.render("filmiinimesed", { personList: [] }); // tühi massiiv, et ei tekiks mingit jama, igaks juhuks
     }
     finally {
-        if (conn) { // kui ühendus ON olemas:
-            await conn.end(); // closes the DB connection
-            console.log("Connection ended!");
-        }
+        console.log("Ühendus lõppenud!");
     }
 }
 
@@ -61,7 +49,6 @@ const inimesedAdd = (req, res) => {
 const inimesedAddPost = async (req, res) => {
     console.log(req.body);
     let deceasedDate = null;
-    let conn; // connection
     let sqlReq = "INSERT INTO person (first_name, last_name, born, deceased) VALUES (?, ?, ?, ?)";
 
     if (!req.body.firstNameInput || !req.body.lastNameInput || !req.body.bornInput || !req.body.bornInput >= new Date()) {
@@ -69,12 +56,11 @@ const inimesedAddPost = async (req, res) => {
     }
     else {
         try {
-            conn = await mysql.createConnection(dbConfig);
             console.log("DB ühendus loodud!");
             if (req.body.deceasedInput != "") {
                 deceasedDate = req.body.deceasedInput;
             }
-            const [result] = await conn.execute(sqlReq, [req.body.firstNameInput, req.body.lastNameInput, req.body.bornInput, deceasedDate]); // kuna tuleb palju andmeid tagasi, siis on result massiiv
+            const [result] = await pool.execute(sqlReq, [req.body.firstNameInput, req.body.lastNameInput, req.body.bornInput, deceasedDate]); // kuna tuleb palju andmeid tagasi, siis on result massiiv
             console.log("Salvestati kirje: " + result.insertId); // saame teada selle äsja lisatud kirje ID
             res.render("filmiinimesed_add", { notice: "Salvestamine õnnestus!" });
         }
@@ -83,10 +69,7 @@ const inimesedAddPost = async (req, res) => {
             res.render("filmiinimesed_add", { notice: "Salvestamine ebaõnnestus!" });
         }
         finally {
-            if (conn) {
-                await conn.end();
-                console.log("Connection ended!");
-            }
+            console.log("Connection ended!");
         }
     }
 }
@@ -109,12 +92,10 @@ const filmPositionAdd = (req, res) => { // näitab tühja lehte
 
 // app.get("/Eestifilm/film_positions", (req, res) => {
 const position = async (req, res) => {
-    let conn;
     const sqlReq = "SELECT * FROM `position`"; // teeb SQL päringu minu andmebaasile, tavalised SQL commandid
     try {
-        conn = await mysql.createConnection(dbConfig);
         console.log(sqlReq);
-        const [rows, fields] = await conn.execute(sqlReq); // saadab selle ülevalpool nimetatud asja (sqlReq const) välja, salvestab selle massiivi! rows ja fields, kuna tegemist on SELECT käsuga
+        const [rows, fields] = await pool.execute(sqlReq); // saadab selle ülevalpool nimetatud asja (sqlReq const) välja, salvestab selle massiivi! rows ja fields, kuna tegemist on SELECT käsuga
         res.render("film_positions", { positionList: rows });
     }
     catch (err) {
@@ -123,10 +104,7 @@ const position = async (req, res) => {
 
     }
     finally {
-        if (conn) { // kui ühendus ON olemas:
-            await conn.end(); // closes the DB connection
-            console.log("Connection ended!");
-        }
+        console.log("Connection ended!");
     }
 };
 
@@ -134,43 +112,27 @@ const position = async (req, res) => {
 // app.post("/Eestifilm/filmi_position_add", (req, res) => {
 const filmPositionAddPost = async (req, res) => { // võtab info ja saada POSTi
     console.log(req.body);
-    let conn; // connection
     let sqlReq = "INSERT INTO `position` (position_name, description) VALUES (?, ?)"; // küsimärgid märgivad saadetavaid andmeid, nii palju kui vajalikke andmeid, nii palju küsimärke
     try {
-        conn = await mysql.createConnection(dbConfig);
         console.log("DB ühendus loodud!");
-        const [result] = await conn.execute(sqlReq, [req.body.positionInput, req.body.positionDescriptionInput]); // kuna tuleb palju andmeid tagasi, siis on result massiiv
+        const [result] = await pool.execute(sqlReq, [req.body.positionInput, req.body.positionDescriptionInput]); // kuna tuleb palju andmeid tagasi, siis on result massiiv
         console.log("Salvestati kirje: " + result.insertId); // saame teada selle äsja lisatud kirje ID
-        await res.redirect("/Eestifilm/film_positions");
+        await res.redirect("/Eestifilm/position");
     }
     catch (err) {
         throw (err);
     }
     finally {
-        if (conn) { // kui ühendus ON olemas:
-            await conn.end(); // closes the DB connection
-            console.log("Connection ended!");
-        }
+        console.log("Connection ended!");
     }
-    // conn.execute(sqlReq, [req.body.positionInput, req.body.positionDescriptionInput], (err, sqlres) => {
-    //     if (err) {
-    //         console.error("SQL insert error:", err);
-    //         res.render("filmi_position_add", { notice: "Salvestamine ebaõnnestus!" });
-    //     }
-    //     else {
-    //         res.redirect("/Eestifilm/film_positions");
-    //     }
-    // });
 }
 
 const movies = async (req, res) => {
     // title, production_year, duration (minutes), description
-    let conn;
     const sqlReq = "SELECT * FROM movie"; // teeb SQL päringu minu andmebaasile, tavalised SQL commandid
     try {
-        conn = await mysql.createConnection(dbConfig);
         console.log(sqlReq);
-        const [rows, fields] = await conn.execute(sqlReq); // saadab selle ülevalpool nimetatud asja (sqlReq const) välja, salvestab selle massiivi! rows ja fields, kuna tegemist on SELECT käsuga
+        const [rows, fields] = await pool.execute(sqlReq); // saadab selle ülevalpool nimetatud asja (sqlReq const) välja, salvestab selle massiivi! rows ja fields, kuna tegemist on SELECT käsuga
         res.render("movies", { movieList: rows });
     }
     catch (err) {
@@ -179,10 +141,7 @@ const movies = async (req, res) => {
 
     }
     finally {
-        if (conn) { // kui ühendus ON olemas:
-            await conn.end(); // closes the DB connection
-            console.log("Connection ended!");
-        }
+        console.log("Connection ended!");
     }
 };
 
@@ -196,15 +155,13 @@ const moviesGet = (req, res) => { // näitab tühja form-i
 const movieAddPost = async (req, res) => { // võtab info ja saada POSTi
     console.log(req.body);
     let movieDescription = null;
-    let conn; // connection
     let sqlReq = "INSERT INTO movie (title, production_year, duration, description) VALUES (?, ?, ?, ?)"; // küsimärgid märgivad saadetavaid andmeid, nii palju kui vajalikke andmeid, nii palju küsimärke
     try {
-        conn = await mysql.createConnection(dbConfig);
         console.log("DB ühendus loodud!");
         if (req.body.movieDescription != "") {
             movieDescription = req.body.movieDescriptionInput;
         }
-        const [result] = await conn.execute(sqlReq, [req.body.movieNameInput, req.body.movieProductionYearInput, req.body.movieLengthInput, req.body.movieDescriptionInput]); // kuna tuleb palju andmeid tagasi, siis on result massiiv
+        const [result] = await pool.execute(sqlReq, [req.body.movieNameInput, req.body.movieProductionYearInput, req.body.movieLengthInput, req.body.movieDescriptionInput]); // kuna tuleb palju andmeid tagasi, siis on result massiiv
         console.log("Salvestati kirje: " + result.insertId); // saame teada selle äsja lisatud kirje ID
         await res.redirect("/Eestifilm/movies");
     }
@@ -212,10 +169,7 @@ const movieAddPost = async (req, res) => { // võtab info ja saada POSTi
         throw (err);
     }
     finally {
-        if (conn) { // kui ühendus ON olemas:
-            await conn.end(); // closes the DB connection
-            console.log("Connection ended!");
-        }
+        console.log("Connection ended!");
     }
     // conn.execute(sqlReq, [req.body.positionInput, req.body.positionDescriptionInput], (err, sqlres) => {
     //     if (err) {
@@ -229,12 +183,10 @@ const movieAddPost = async (req, res) => { // võtab info ja saada POSTi
 }
 
 const relationMoviePersonPosition = async (req, res) => {
-    let conn;
     try {
-        conn = await mysql.createConnection(dbConfig);
-        const [movies] = await conn.execute("SELECT * FROM movie");
-        const [persons] = await conn.execute("SELECT * FROM person");
-        const [positions] = await conn.execute("SELECT * FROM position");
+        const [movies] = await pool.execute("SELECT * FROM movie");
+        const [persons] = await pool.execute("SELECT * FROM person");
+        const [positions] = await pool.execute("SELECT * FROM position");
 
         res.render("person_movie_position", { movieList: movies, personList: persons, positionList: positions, notice: "" });
 
@@ -244,17 +196,12 @@ const relationMoviePersonPosition = async (req, res) => {
         res.render("person_movie_position", { movieList: [], personList: [], positionList: [] });
     }
     finally {
-        if (conn) { // kui ühendus ON olemas:
-            await conn.end(); // closes the DB connection
-            console.log("Connection ended!");
-        }
+        console.log("Connection ended!");
     }
 };
 
 const relationMoviePersonPositionPost = async (req, res) => {
-    let conn;
     try {
-        conn = await mysql.createConnection(dbConfig);
         const { personSelect, movieSelect, positionSelect, rolenameInput } = req.body;
         console.log("personSelect:", personSelect);
         console.log("movieSelect:", movieSelect);
@@ -267,13 +214,7 @@ const relationMoviePersonPositionPost = async (req, res) => {
             roleName = rolenameInput || null;
         }
 
-        await conn.execute("INSERT INTO person_in_movie (person_id, movie_id, position_id, role) VALUES (?, ?, ?, ?)", [personSelect, movieSelect, positionSelect, roleName]);
-        /*
-        const [movies] = await conn.execute("SELECT * FROM movie");
-        const [persons] = await conn.execute("SELECT * FROM person");
-        const [positions] = await conn.execute("SELECT * FROM position");
-        res.render("person_movie_position", { movieList: movies, personList: persons, positionList: positions, notice: "Seos lisatud!" });
-        */
+        await pool.execute("INSERT INTO person_in_movie (person_id, movie_id, position_id, role) VALUES (?, ?, ?, ?)", [personSelect, movieSelect, positionSelect, roleName]);
         // redirect to all relations:
         res.redirect("person_movie_relations");
 
@@ -283,26 +224,21 @@ const relationMoviePersonPositionPost = async (req, res) => {
         res.render("person_movie_position", { movieList: [], personList: [], positionList: [], notice: "Viga!" });
     }
     finally {
-        if (conn) { // kui ühendus ON olemas:
-            await conn.end(); // closes the DB connection
-            console.log("Connection ended!");
-        }
+        console.log("Connection ended!");
     }
 };
 
 const personMovieRelations = async (req, res) => {
-    let conn;
     try {
-        conn = await mysql.createConnection(dbConfig);
 
-        const [relations] = await conn.execute("SELECT * FROM person_in_movie");
+        const [relations] = await pool.execute("SELECT * FROM person_in_movie");
         res.render("person_movie_relations", { relationList: relations });
 
     } catch (err) {
         console.error("SQL query error:", err);
         res.render("person_movie_relations", { relationList: [] });
     } finally {
-        if (conn) await conn.end();
+        console.log("Ühendus lõppes!");
     }
 };
 
