@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="et">
+
+<head>
+  <meta charset="utf-8">
+  <title>Viljahoidla</title>
+</head>
+
+<body>
+  <ul>
+    <li><a href="/"> Avaleht </a></li>
+  </ul>
+  <hr>
+  <h2> Auto laost välja registreerimine </h2>
+
+  <form method="POST">
+    <label for="registerNumberSelect">Auto number</label>
+    <select id="registerNumberSelect" name="registerNumberSelect" required>
+      <option selected disabled>Vali auto</option>
+      <% carList.forEach(function(car){ %>
+        <option value="<%= car.id %>">
+          <%= car.register_number + ", " + car.entry_mass + "kg" %>
+        </option>
+        <% }) %>
+    </select>
+
+    <br><br>
+
+    <label for="exitInput">Väljumismass</label>
+    <input id="exitInput" name="exitInput" required>
+
+    <br>
+    <input type="submit" id="carSubmit" name="carSubmit" value="Salvesta auto andmebaasi">
+
+    <br>
+    <br>
+  </form>
+
+  </form>
+  <p>
+    Staatus: <%= notice %>
+  </p>
+
+</body>
+
+
+<!-- <style>
+  h1,
+  p,
+  img {
+    text-align: center;
+    margin: 20px;
+    font-family: Arial, sans-serif;
+  }
+</style> -->
+
+
+</html>

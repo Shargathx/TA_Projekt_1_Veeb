@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="et">
+
+<head>
+    <meta charset="utf-8">
+    <title> |Testleht| </title>
+</head>
+
+<body>
+    <ul>
+        <li><a href="/"> Avaleht </a></li>
+        <li><a href="/viljavedu">Auto lattu registreerimine</a></li>
+        <li><a href="/viljavedu/exit">Auto laost välja registreerimine</a></li>
+    </ul>
+    <hr>
+    <h2> Praegused laos olevad autod </h2>
+    <ol>
+        <% carList.forEach(function(listItem){ %>
+            <li>
+                Auto (registrinumber): <%= listItem.register_number %> Mass: <%= listItem.entry_mass %> kg
+            </li>
+            <% }); %>
+    </ol>
+</body>
+
+</html>

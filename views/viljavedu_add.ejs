@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="et">
+
+<head>
+  <meta charset="utf-8">
+  <title>Viljahoidla</title>
+</head>
+
+<body>
+  <ul>
+    <li><a href="/"> Avaleht </a></li>
+  </ul>
+  <hr>
+  <h2> Auto lattu registreerimine </h2>
+
+  <form method="POST">
+    <label for="registerNumberInput"> Registrinumber </label>
+    <input id="registerNumberInput" name="registerNumberInput" type="text" placeholder="Auto registrinumber" required>
+    <br>
+    <br>
+    <label for="entryMassInput"> Sisenemismass </label>
+    <input id="entryMassInput" name="entryMassInput" type="text" placeholder="Sisenemismass" required>
+    <br>
+    <br>
+    <input type="submit" id="carSubmit" name="carSubmit" value="Salvesta auto andmebaasi">
+
+  </form>
+  <p>
+    Staatus: <%= notice %>
+  </p>
+
+</body>
+
+
+<!-- <style>
+  h1,
+  p,
+  img {
+    text-align: center;
+    margin: 20px;
+    font-family: Arial, sans-serif;
+  }
+</style> -->
+
+
+</html>
