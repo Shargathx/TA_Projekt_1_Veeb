@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="et">
+
+<head>
+  <meta charset="utf-8">
+  <title>Viljahoidla</title>
+</head>
+
+<body>
+  <ul>
+    <li><a href="/"> Avaleht </a></li>
+  </ul>
+  <hr>
+  <h2>Viljaveo kokkuvõte</h2>
+
+  <form method="GET">
+    <label>Autonumber:</label>
+    <input type="text" name="carNumber" value="<%= selectedCar %>">
+    <button type="submit">Filtreeri</button>
+    <a href="/viljavedu/total">Näita kõiki</a>
+  </form>
+
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr>
+        <th>Autonumber</th>
+        <th>Sisenemismass (kg)</th>
+        <th>Väljumismass (kg)</th>
+        <th>Veetud vilja mass (kg)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% carList.forEach(car=> { %>
+        <tr>
+          <td>
+            <%= car.register_number %>
+          </td>
+          <td>
+            <%= car.entry_mass %>
+          </td>
+          <td>
+            <%= car.exit_mass !==null ? car.exit_mass : "—" %>
+          </td>
+          <td>
+            <%= car.cropMass %>
+          </td>
+        </tr>
+        <% }) %>
+    </tbody>
+  </table>
+  <h3>Kokku veetud vilja mass: <%= totalMass %> kg</h3>
+
+
+  <p>
+    Staatus: <%= notice %>
+  </p>
+
+</body>
+
+
+<!-- <style>
+  h1,
+  p,
+  img {
+    text-align: center;
+    margin: 20px;
+    font-family: Arial, sans-serif;
+  }
+</style> -->
+
+
+</html>

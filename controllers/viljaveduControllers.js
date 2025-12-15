@@ -30,6 +30,41 @@ const autod = async (req, res) => {
     }
 }
 
+const getAllTrucks = async (req, res) => {
+    const sqlReq = "SELECT * FROM viljavedu";
+    try {
+        console.log("DB ühendus loodud!");
+        const [rows] = await pool.execute(sqlReq);
+        const carFilter = req.query.carNumber;
+        let totalCropMass = 0;
+        let updatedRows = [];
+
+        for (const row of rows) {
+            if (carFilter && row.register_number !== carFilter){
+                continue;
+            }
+            let cropMass = 0;
+
+            if (row.exit_mass !== null) {
+                cropMass = row.entry_mass - row.exit_mass
+                totalCropMass += cropMass
+            }
+            updatedRows.push({ ...row, cropMass })
+            // updatedRows.push({row})
+        }
+
+        console.log("Vilja mass: " + totalCropMass);
+        res.render("viljavedu_total", { carList: updatedRows, totalMass: totalCropMass, selectedCar: carFilter || "", notice: "Kõik normis!" });
+    }
+    catch (err) {
+        console.log("Viga!" + err);
+        res.render("viljavedu_total", { carList: [], totalMass: 0, selectedCar: "", notice: "Mingi viga" });
+    }
+    finally {
+        console.log("Ühendus lõppenud!");
+    }
+}
+
 // @desc page for GETTING people involved in Estonian films
 // @route GET /Eestifilm/filmiinimesed_add
 //@access public
@@ -73,7 +108,7 @@ const viljaveduInAddPost = async (req, res) => {
 const viljaveduOutAdd = async (req, res) => {
     console.log(req.body);
     let sqlReq = "SELECT * FROM viljavedu WHERE exit_mass IS NULL";
-        try {
+    try {
         console.log("DB ühendus loodud!");
         const [rows] = await pool.execute(sqlReq);
         res.render("viljavedu_exit", { carList: rows, notice: "Ootan väljumismassi" });
@@ -286,5 +321,6 @@ module.exports = {
     viljaveduInAdd,
     viljaveduInAddPost,
     viljaveduOutAdd,
-    viljaveduOutAddPost
+    viljaveduOutAddPost,
+    getAllTrucks
 }
